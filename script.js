@@ -1,5 +1,3 @@
-
-// Init CodeMirror
 const htmlEditor = CodeMirror.fromTextArea(document.getElementById("htmlEditor"), {
     mode: "htmlmixed",
     theme: "material-darker",
