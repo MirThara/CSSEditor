@@ -10,5 +10,71 @@
         "insertText": "<h1>$0</h1>",
         "documentation": "Heading 1",
         "kind": "Snippet"
+    },
+    {
+        "label": "ul",
+        "insertText": "<ul>$0</ul>",
+        "documentation": "unordered list",
+        "kind": "Snippet"
+    },
+    {
+        "label": "ol",
+        "insertText": "<ol>$0</ol>",
+        "documentation": "ordered list",
+        "kind": "Snippet"
+    },
+    {
+        "label": "li",
+        "insertText": "<li>$0</li>",
+        "documentation": "list item",
+        "kind": "Snippet"
+    },
+    {
+        "label": "table",
+        "insertText": "<table>$0</table>",
+        "documentation": "table element",
+        "kind": "Snippet"
+    },
+    {
+        "label": "tr",
+        "insertText": "<tr>$0</tr>",
+        "documentation": "table row",
+        "kind": "Snippet"
+    },
+    {
+        "label": "th",
+        "insertText": "<th>$0</th>",
+        "documentation": "Table head",
+        "kind": "Snippet"
+    },
+    {
+        "label": "td",
+        "insertText": "<td>$0</td>",
+        "documentation": "Table-data",
+        "kind": "Snippet"
+    },
+    {
+        "label": "img",
+        "insertText": "<img src=\"$1\" alt=\"$2\">",
+        "documentation": "image",
+        "kind": "Snippet"
+    },
+    {
+        "label": "video",
+        "insertText": "<video src=\"$0\"></video>",
+        "documentation": "video",
+        "kind": "Snippet"
+    },
+    {
+        "label": "audio",
+        "insertText": "<audio src=\"$0\"></audio>",
+        "documentation": "audio",
+        "kind": "Snippet"
+    },
+    {
+        "label": "div",
+        "insertText": "<div>$0</div>",
+        "documentation": "div element",
+        "kind": "Snippet"
     }
 ]
