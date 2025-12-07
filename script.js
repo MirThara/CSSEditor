@@ -6,7 +6,7 @@ require.config({
 require(["vs/editor/editor.main"], () => {
     let highlightLayer = document.getElementById('highlightLayer');
     monaco.editor.setTheme("vs-dark")
-    const htmlModel = monaco.editor.createModel("<h1>Hello</h1>", "html");
+    const htmlModel = monaco.editor.createModel("<h1>Hello World</h1>", "html");
     const cssModel = monaco.editor.createModel("h1 { color: red; }", "css");
 
     const htmlEditor = monaco.editor.create(document.getElementById('htmlEditor'), {
