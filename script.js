@@ -73,9 +73,6 @@ require(["vs/editor/editor.main"], () => {
         const openIndex = cssBefore.lastIndexOf("{");
         const closeIndex = cssBefore.lastIndexOf("}");
 
-        const selectorBlock = cssBefore.slice(0, openIndex);
-        // const rawSelector = selectorBlock.split("}").pop().trim();
-
         let selector;
 
         if (openIndex < closeIndex || openIndex === -1) {
@@ -88,16 +85,12 @@ require(["vs/editor/editor.main"], () => {
             const selectorText = cssModel.getValue().slice(0, openIndex).split("}").pop().trim();
             selector = selectorText.split(/\s*,\s*/).pop();
         }
+        let elements;
 
         if (!selector) {
             highlightLayer.innerHTML = "";
             return;
         }
-
-        highlightLayer.innerHTML = "";
-        const doc = preview.contentDocument;
-        let elements;
-
         try {
             elements = preview.contentDocument.querySelectorAll(selector);
         } catch (e) {
@@ -106,20 +99,37 @@ require(["vs/editor/editor.main"], () => {
             return;
         }
 
+        if (!elements.length) return;
+
+        const target = elements[0];
+        const iframeWindow = preview.contentWindow;
         const iframeRect = preview.getBoundingClientRect();
+        const elementRect = target.getBoundingClientRect();
 
-        elements.forEach(element => {
-            const r = element.getBoundingClientRect();
+        highlightLayer.innerHTML = "";
+        const doc = preview.contentDocument;
 
-            const left = r.left - iframeRect.left;
+        const scrollY = elementRect.top + iframeWindow.scrollY - iframeRect.top - 50;
+        const scrollX = elementRect.left + iframeWindow.scrollX - iframeRect.left - 20;
+        iframeWindow.scrollTo({top: scrollY, left: scrollX, behaviour: "smooth"});
+
+        elements.forEach(el => {
+            const r = el.getBoundingClientRect();
+            const style = preview.contentWindow.getComputedStyle(el);
+
+            const width = r.width || el.offsetWidth || parseFloat(style.width);
+            const height = r.height || el.offsetHeight || parseFloat(style.height);
+
+            const left = r.left + iframeRect.left;
             const top = r.top - iframeRect.top;
 
             const box = document.createElement("div");
             box.className = "highlightbox";
-            box.style.left = -(left) + "px";
-            box.style.top = (top - iframeRect.top) + "px";
-            box.style.width = r.width + "px";
-            box.style.height = r.height + "px";
+            box.style.position = "absolute";
+            box.style.left = left + "px";
+            box.style.top = top + "px";
+            box.style.width = width + "px";
+            box.style.height = height + "px";
 
             const label = document.createElement("div");
             label.style.position = "absolute";
@@ -135,6 +145,7 @@ require(["vs/editor/editor.main"], () => {
             box.appendChild(label);
             highlightLayer.appendChild(box);
         });
+
 
     }
     htmlModel.onDidChangeContent(updatePreview);
