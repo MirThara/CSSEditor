@@ -11,6 +11,8 @@ body {
     align-items: center;
 }
 
+/*** SETUP ***/
+
 .container {
     display: flex;
     flex-direction: column;
@@ -27,6 +29,8 @@ body {
 #cssEditor {
     height: 100%;
 }
+
+/*** HIGHLIGHT BOX ***/
 
 #highlightLayer {
     position: absolute;

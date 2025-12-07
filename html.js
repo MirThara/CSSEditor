@@ -1,3 +1,4 @@
+// base HTML that is visible when user first opens page
 let exampleHTML = `
     <h1>Hallo Welt!</h1>
     <p>Dies ist eine Beispielwebsite mit weltbewegendem Inhalt</p>
