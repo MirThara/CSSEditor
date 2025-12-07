@@ -1,41 +1,20 @@
 <!DOCTYPE html>
-<html lang="de">
-
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>HTML/CSS Live Editor mit Highlight</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css" />
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material-darker.min.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS-Editor</title>
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/loader.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <div id="leftPane">
-        <h2>HTML / CSS Editor</h2>
-        <div id="editors">
-            <div class="editor-wrap">
-                <h3>HTML</h3>
-                <textarea id="htmlEditor"><h1>Hallo Welt</h1><p>Dies ist ein Absatz.</p></textarea>
-            </div>
-            <div class="editor-wrap">
-                <h3>CSS</h3>
-                <textarea id="cssEditor">h1 {color: red;}</textarea>
-            </div>
-        </div>
+    <div class="container">
+        <div id="htmlEditor"></div>
+        <div id="cssEditor"></div>
     </div>
-
-    <div id="previewWrapper">
-        <iframe id="previewIframe"></iframe>
-        <div id="highlightLayer"></div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
-
+    <div id="highlightLayer"></div>
+    <iframe id="preview" class="preview"></iframe>
+        
     <script src="script.js"></script>
 </body>
-
 </html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Monaco HTML/CSS Live-Editor mit Highlight</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            --bg: #1e1e1e;
+            --panel: #0f1720;
+            --muted: #9ca3af
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0
+        }
+
+        body {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 8px;
+            height: 100vh;
+            background: var(--bg);
+            color: #fff;
+            font-family: Inter, Segoe UI, Roboto, system-ui, sans-serif;
+            padding: 8px;
+            box-sizing: border-box
+        }
+
+        .panel {
+            background: var(--panel);
+            border-radius: 6px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6)
+        }
+
+        header h2 {
+            margin: 0;
+            font-size: 14px
+        }
+
+        .editor-title {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        #editors {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            height: calc(100vh - 40px)
+        }
+
+        .editor-block {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0
+        }
+
+        #previewWrapper {
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden
+        }
+
+        #previewIframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: white
+        }
+
+        #highlightLayer {
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 9999
+        }
+
+        .highlight-box {
+            position: absolute;
+            box-sizing: border-box;
+            background: rgba(0, 122, 255, 0.18);
+            border: 2px solid rgba(0, 122, 255, 0.95);
+            border-radius: 3px;
+            pointer-events: none
+        }
+
+        .highlight-box .label {
+            position: absolute;
+            left: 0;
+            top: -22px;
+            background: rgba(0, 122, 255, 0.95);
+            color: white;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px
+        }
+
+        /* small responsive tweak */
+        @media (max-width:900px) {
+            body {
+                grid-template-columns: 1fr;
+                grid-auto-rows: 1fr
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="panel">
+        <header>
+            <h2>Monaco Editor — HTML &amp; CSS</h2>
+            <div style="font-size:12px;color:var(--muted)">Live-Vorschau + Inspector-Highlight</div>
+        </header>
+
+        <div id="editors">
+            <div class="editor-block">
+                <div class="editor-title">HTML</div>
+                <div id="htmlEditor" style="height:40%;min-height:160px;border-radius:4px;overflow:hidden"></div>
+            </div>
+
+            <div class="editor-block">
+                <div class="editor-title">CSS</div>
+                <div id="cssEditor" style="height:40%;min-height:160px;border-radius:4px;overflow:hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="previewWrapper" class="panel" style="padding:0;">
+        <iframe id="previewIframe" sandbox="allow-scripts allow-same-origin"></iframe>
+        <div id="highlightLayer"></div>
+    </div>
+
+    <!-- Monaco via unpkg + require -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    <script>
+        // Configure Monaco path (unpkg CDN)
+        require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@0.45.1/min/vs' } });
+        window.MonacoEnvironment = {
+            getWorkerUrl: function (workerId, label) {
+                return 'data:text/javascript;charset=utf-8,' + encodeURIComponent(`self.MonacoEnvironment = { baseUrl: 'https://unpkg.com/monaco-editor@0.45.1/min/' };
+      importScripts('https://unpkg.com/monaco-editor@0.45.1/min/vs/base/worker/workerMain.js');`);
+            }
+        };
+
+        require(['vs/editor/editor.main'], function () {
+            // Create editors
+            const htmlEditor = monaco.editor.create(document.getElementById('htmlEditor'), {
+                value: `\<!DOCTYPE html\>\n\<html\>\n  \<head\>\<\/head\>\n  \<body\>\n    \<h1\>Hallo Welt\<\/h1\>\n    \<p\>Das ist ein Beispieltext.\<\/p\>\n  \<\/body\>\n\<\/html\>`,
+                language: 'html',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: { enabled: false }
+            });
+
+            const cssEditor = monaco.editor.create(document.getElementById('cssEditor'), {
+                value: `h1 {\n  color: #b91c1c;\n}\n\n/* Tippe z.B. h1 oder .class schon beim Schreiben, Highlight erscheint */`,
+                language: 'css',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: { enabled: false }
+            });
+
+            const iframe = document.getElementById('previewIframe');
+            const highlightLayer = document.getElementById('highlightLayer');
+
+            // Render preview
+            function updatePreview() {
+                const html = htmlEditor.getValue();
+                const css = cssEditor.getValue();
+
+                const doc = iframe.contentDocument || iframe.contentWindow.document;
+                const full = `\<!doctype html\>\<html\>\<head\>\<meta charset="utf-8"\>\<style\>${css}\<\/style\>\<\/head\>\<body\>${html}\<\/body\>\<\/html\>`;
+                doc.open();
+                doc.write(full);
+                doc.close();
+
+                // After content is written, run highlight to sync sizes
+                setTimeout(highlightActiveSelector, 10);
+            }
+
+            // Determine current selector while typing (works while typing selector even without '{')
+            function getCurrentSelectorFromCSS() {
+                const model = cssEditor.getModel();
+                const pos = cssEditor.getPosition();
+                const index = model.getOffsetAt(pos);
+                const text = model.getValue();
+                const before = text.slice(0, index);
+
+                const lastOpen = before.lastIndexOf('{');
+                const lastClose = before.lastIndexOf('}');
+
+                let selector = null;
+
+                if (lastOpen === -1 || lastOpen < lastClose) {
+                    // not inside rule — use current line trimmed
+                    const line = model.getLineContent(pos.lineNumber).trim();
+                    // strip comments
+                    const noComment = line.replace(/\/\*.*?\*\//g, '').trim();
+                    const m = noComment.match(/^[^{}]+/);
+                    if (m) selector = m[0].trim();
+                } else {
+                    // inside a rule — find selector before lastOpen
+                    const beforeOpen = text.slice(0, lastOpen);
+                    const lastSelector = beforeOpen.split('}').pop().trim();
+                    selector = lastSelector.split(/\s*,\s*/).pop();
+                }
+
+                if (!selector) return null;
+                // normalize whitespace and trim commas
+                selector = selector.replace(/\s+/g, ' ');
+                selector = selector.replace(/^[,]+|[,]+$/g, '').trim();
+                if (!selector) return null;
+                return selector;
+            }
+
+            // Highlight logic: find elements in iframe and draw overlay boxes
+            function highlightActiveSelector() {
+                const selector = getCurrentSelectorFromCSS();
+                // clear
+                highlightLayer.innerHTML = '';
+                if (!selector) return;
+
+                let doc;
+                try { doc = iframe.contentDocument || iframe.contentWindow.document; } catch (e) { return; }
+
+                let els;
+                try { els = doc.querySelectorAll(selector); } catch (e) { return; }
+                if (!els || els.length === 0) return;
+
+                const iframeRect = iframe.getBoundingClientRect();
+
+                els.forEach(el => {
+                    const r = el.getBoundingClientRect();
+                    const box = document.createElement('div');
+                    box.className = 'highlight-box';
+
+                    box.style.left = (r.left - iframeRect.left) + 'px';
+                    box.style.top = (r.top - iframeRect.top) + 'px';
+                    box.style.width = Math.max(2, r.width) + 'px';
+                    box.style.height = Math.max(2, r.height) + 'px';
+
+                    const label = document.createElement('div');
+                    label.className = 'label';
+                    label.textContent = selector;
+                    box.appendChild(label);
+
+                    highlightLayer.appendChild(box);
+                });
+            }
+
+            // Wire up events
+            htmlEditor.onDidChangeModelContent(() => updatePreview());
+            cssEditor.onDidChangeModelContent(() => {
+                updatePreview();
+            });
+
+            // Also highlight while cursor moves in CSS editor (so preview updates on caret moves)
+            cssEditor.onDidChangeCursorPosition(() => highlightActiveSelector());
+
+            // initial render
+            updatePreview();
+
+            // Resize highlightLayer when iframe scrolls/resizes
+            const ro = new ResizeObserver(() => highlightActiveSelector());
+            ro.observe(iframe);
+
+            // Click-to-insert simple selector rule in CSS editor (optional convenience)
+            iframe.addEventListener('load', () => {
+                try {
+                    const doc = iframe.contentDocument || iframe.contentWindow.document;
+                    doc.addEventListener('click', (ev) => {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        const path = [];
+                        let el = ev.target;
+                        while (el && el.nodeType === 1 && path.length < 5) {
+                            let part = el.tagName.toLowerCase();
+                            if (el.id) part += '#' + el.id;
+                            else if (el.classList && el.classList.length) part += '.' + Array.from(el.classList).join('.');
+                            path.unshift(part);
+                            el = el.parentElement;
+                        }
+                        const simplest = path[path.length - 1] || '';
+                        const pos = cssEditor.getPosition();
+                        cssEditor.executeEdits('insert-selector', [{ range: new monaco.Range(pos.lineNumber + 1, 1, pos.lineNumber + 1, 1), text: '\n' + simplest + ' {\n  \n}\n' }]);
+                        cssEditor.focus();
+                        highlightActiveSelector();
+                    }, true);
+                } catch (e) {
+                    // sandbox or cross-origin could prevent access — silently ignore
+                }
+            });
+
+        });
+    </script>
+</body>
+
+</html>
