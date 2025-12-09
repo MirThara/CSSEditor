@@ -24,7 +24,7 @@ let exampleHTML = `
         </li>
     </ol>
 
-    <div class="div">das ganz besonders wichtiges DIV</div>
+    <div class="div">das ganz besonders wichtige DIV</div>
     <input type="text" name="test" id="test" placeholder="die gefährliche Texteingabe">
     <button type="submit">Der SUBMIT-BUTTON</button>
 
