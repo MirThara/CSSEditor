@@ -180,5 +180,5 @@ require(["vs/editor/editor.main"], () => {
     cssModel.onDidChangeContent(updatePreview);
     updatePreview();
 
-    window.addEventListener('resize', updatePreview);
+    window.addEventListener('resize', updatePreview); // if screen size changed, update
 });
