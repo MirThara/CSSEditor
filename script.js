@@ -179,4 +179,6 @@ require(["vs/editor/editor.main"], () => {
     htmlModel.onDidChangeContent(updatePreview);
     cssModel.onDidChangeContent(updatePreview);
     updatePreview();
+
+    window.addEventListener('resize', updatePreview);
 });
